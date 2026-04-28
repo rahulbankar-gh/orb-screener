@@ -594,7 +594,7 @@ function renderTable() {
     const dots=Array(5).fill(0).map((_,i)=>`<div class="dot" style="background:${i<r.score?dc:'#1e1e2e'}"></div>`).join('');
     const st=secText[r.sec]||'#888';
     return `<tr>
-      <td><a href="tradingview://chart?symbol=NSE:${r.sym}" onclick="setTimeout(()=>{window.open('https://www.tradingview.com/symbols/NSE-${r.sym}/','_blank')},500)" style="text-decoration:none" title="Open in TradingView"><span class="tkr" style="border-bottom:1px dotted #4ade80">${r.sym} ↗</span></a></td>
+      <td><a href="https://www.tradingview.com/chart/?symbol=NSE:${r.sym}" target="_blank" style="text-decoration:none" title="Open ${r.sym} in TradingView"><span class="tkr" style="border-bottom:1px dotted #4ade80">${r.sym} ↗</span></a></td>
       <td>${r.price>0?r.price.toFixed(2):'–'}</td>
       <td class="${cc}">${cs}</td>
       <td><span class="badge ${r.badge||'nd'}">${r.status}</span></td>

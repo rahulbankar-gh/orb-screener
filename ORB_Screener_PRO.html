@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSE F&O ORB Screener PRO</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0b0b10;color:#ddd;min-height:100vh;padding:14px}
+h1{font-size:20px;font-weight:600;color:#fff}
+.sub{font-size:12px;color:#555;margin-top:2px}
+.topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+select,input[type=text]{background:#141420;border:1px solid #252535;color:#ddd;padding:6px 10px;border-radius:6px;font-size:13px}
+button{padding:6px 13px;border-radius:6px;border:1px solid #252535;background:#141420;color:#ddd;font-size:13px;cursor:pointer}
+button:hover{background:#1e1e2c}
+button:disabled{opacity:.4;cursor:not-allowed}
+.btn-go{background:#0d3d28;border-color:#165c3a;color:#4ade80}
+.btn-go:hover{background:#10502f}
+.btn-purple{background:#1a1028;border-color:#3a2050;color:#c084fc}
+.btn-red{background:#1a0f0f;border-color:#401a1a;color:#f87171}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px}
+.stat{background:#141420;border:1px solid #1e1e2e;border-radius:8px;padding:9px 12px}
+.slabel{font-size:11px;color:#555;margin-bottom:3px}
+.sval{font-size:20px;font-weight:600}
+
+/* ADVANCE DECLINE BAR */
+.adbar-wrap{background:#141420;border:1px solid #1e1e2e;border-radius:8px;padding:10px 14px;margin-bottom:10px}
+.adbar-title{font-size:12px;color:#888;margin-bottom:8px;display:flex;justify-content:space-between}
+.adbar{display:flex;height:20px;border-radius:6px;overflow:hidden;gap:2px}
+.adbar-adv{background:#22c55e;transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#052e16;min-width:30px}
+.adbar-unch{background:#3a3a4a;display:flex;align-items:center;justify-content:center;font-size:11px;color:#888;min-width:20px}
+.adbar-dec{background:#ef4444;transition:width .5s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#450a0a;min-width:30px}
+.adbar-legend{display:flex;gap:16px;margin-top:6px;font-size:11px}
+.adbar-legend span{display:flex;align-items:center;gap:4px}
+.dot12{width:10px;height:10px;border-radius:2px}
+
+/* PROGRESS */
+.progress-bar{height:3px;background:#1e1e2e;border-radius:2px;margin-bottom:10px;overflow:hidden}
+.progress-fill{height:100%;background:#1D9E75;border-radius:2px;transition:width .3s}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:12px;border-bottom:1px solid #1e1e2e;padding-bottom:0}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;color:#666;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab:hover{color:#aaa}
+.tab.active{color:#c084fc;border-bottom-color:#c084fc}
+
+/* FILTER ROW */
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+
+/* TABLE */
+.tbl-wrap{background:#141420;border:1px solid #1e1e2e;border-radius:10px;overflow:hidden;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+th{background:#0f0f1a;color:#666;font-weight:500;padding:8px 10px;text-align:left;border-bottom:1px solid #1e1e2e;font-size:11px;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;white-space:nowrap}
+th:hover{color:#aaa}
+td{padding:9px 10px;border-bottom:1px solid #181825;color:#bbb;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#181828}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;white-space:nowrap}
+.ce2{background:#0a2e1a;color:#4ade80;border:1px solid #145a30}
+.ce1{background:#071f12;color:#86efac;border:1px solid #0d3d20}
+.pe2{background:#2e0a0a;color:#f87171;border:1px solid #5c1a1a}
+.pe1{background:#1f0707;color:#fca5a5;border:1px solid #3d0d0d}
+.wait{background:#231a07;color:#fbbf24;border:1px solid #4a3510}
+.nd{background:#151520;color:#444;border:1px solid #202030}
+.pos{color:#4ade80}.neg{color:#f87171}
+.tkr{font-weight:600;color:#fff;font-size:13px}
+.dots{display:flex;gap:3px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%}
+.msgrow td{text-align:center;padding:28px;color:#444}
+.orbs{font-size:11px;color:#555}
+.sec-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:#1a1a28;color:#555}
+.ts{font-size:11px;color:#444}
+
+/* MANAGE PANEL */
+.manage-panel{background:#111118;border:1px solid #2a2035;border-radius:10px;padding:14px;margin-bottom:12px}
+.manage-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.chip-container{display:flex;flex-wrap:wrap;gap:5px;max-height:200px;overflow-y:auto;padding:4px 0;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid #2a2a3a;border-radius:5px;padding:3px 7px;font-size:11px}
+.chip-x{color:#555;cursor:pointer;font-size:14px;line-height:1;margin-left:2px}
+.chip-x:hover{color:#f87171}
+
+/* SECTOR CHART */
+.sector-wrap{background:#141420;border:1px solid #1e1e2e;border-radius:10px;padding:14px;margin-bottom:10px}
+.sector-title{font-size:14px;font-weight:600;color:#c084fc;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.sector-row{display:flex;align-items:center;margin-bottom:6px;gap:8px}
+.sector-name{font-size:12px;color:#888;width:140px;flex-shrink:0;text-align:right}
+.sector-bar-wrap{flex:1;background:#1a1a28;border-radius:3px;height:18px;overflow:hidden;position:relative}
+.sector-bar{height:100%;border-radius:3px;transition:width .5s;display:flex;align-items:center;padding:0 6px;font-size:11px;font-weight:600;white-space:nowrap}
+.sector-pct{font-size:12px;width:55px;text-align:right;flex-shrink:0}
+
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>NSE F&amp;O ORB Screener PRO</h1>
+    <div class="sub">224 F&amp;O stocks · Opening Range Breakout 9:15–9:30 IST · ~15min delayed</div>
+  </div>
+  <div class="controls">
+    <input type="text" style="width:160px" id="searchInput" placeholder="Search symbol..." oninput="renderTable()">
+    <select id="sectorSel" onchange="renderTable()">
+      <option value="all">All Sectors</option>
+      <option value="Banking">Banking</option>
+      <option value="IT">IT</option>
+      <option value="Auto">Auto</option>
+      <option value="Pharma">Pharma</option>
+      <option value="PSU">PSU</option>
+      <option value="Metal">Metal</option>
+      <option value="Energy">Energy</option>
+      <option value="FMCG">FMCG</option>
+      <option value="Infra">Infra</option>
+      <option value="Finance">Finance</option>
+    </select>
+    <select id="filterSel" onchange="renderTable()">
+      <option value="all">All Signals</option>
+      <option value="ce">BUY CE only</option>
+      <option value="pe">BUY PE only</option>
+      <option value="strong">Strong ++ only</option>
+      <option value="wait">Watching only</option>
+    </select>
+    <button class="btn-go" id="refreshBtn" onclick="startScan()">&#8635; Scan All</button>
+    <span class="ts" id="ts"></span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="slabel">Total Stocks</div><div class="sval" style="color:#fff" id="s-total">224</div></div>
+  <div class="stat"><div class="slabel">BUY CE</div><div class="sval pos" id="s-ce">–</div></div>
+  <div class="stat"><div class="slabel">BUY PE</div><div class="sval neg" id="s-pe">–</div></div>
+  <div class="stat"><div class="slabel">Watching</div><div class="sval" style="color:#fbbf24" id="s-wait">–</div></div>
+  <div class="stat"><div class="slabel">Loaded</div><div class="sval" style="color:#888" id="s-loaded">0/224</div></div>
+</div>
+
+<!-- ADVANCE DECLINE BAR -->
+<div class="adbar-wrap">
+  <div class="adbar-title">
+    <span>Market Breadth — Advance / Decline</span>
+    <span id="ad-ratio" style="color:#888">–</span>
+  </div>
+  <div class="adbar" id="adbar">
+    <div class="adbar-adv" id="adv-bar" style="width:33%">–</div>
+    <div class="adbar-unch" id="unch-bar" style="width:33%">–</div>
+    <div class="adbar-dec" id="dec-bar" style="width:33%">–</div>
+  </div>
+  <div class="adbar-legend">
+    <span><div class="dot12" style="background:#22c55e"></div><span style="color:#4ade80" id="adv-count">Advancing: –</span></span>
+    <span><div class="dot12" style="background:#3a3a4a"></div><span style="color:#888" id="unch-count">Unchanged: –</span></span>
+    <span><div class="dot12" style="background:#ef4444"></div><span style="color:#f87171" id="dec-count">Declining: –</span></span>
+    <span style="color:#888" id="ad-loaded">Loaded: 0/224</span>
+  </div>
+</div>
+
+<div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('screener',this)">📊 ORB Screener</div>
+  <div class="tab" onclick="showTab('sector',this)">🏭 Sector Performance</div>
+  <div class="tab" onclick="showTab('manage',this)">⚙️ Manage Stocks</div>
+</div>
+
+<!-- TAB: SCREENER -->
+<div id="tab-screener">
+  <div class="filter-row">
+    <span style="font-size:12px;color:#555">Sort:</span>
+    <button onclick="sortBy('status')">Signal</button>
+    <button onclick="sortBy('change')">Chg%</button>
+    <button onclick="sortBy('score')">Score</button>
+    <button onclick="sortBy('symbol')">A–Z</button>
+    <button onclick="sortBy('price')">Price</button>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px" onclick="sortBy('symbol')">Symbol</th>
+          <th style="width:85px"  onclick="sortBy('price')">Price</th>
+          <th style="width:72px"  onclick="sortBy('change')">Chg%</th>
+          <th style="width:118px" onclick="sortBy('status')">ORB Signal</th>
+          <th style="width:105px">ORB Range</th>
+          <th style="width:65px"  onclick="sortBy('score')">Score</th>
+          <th style="width:75px">Volume</th>
+          <th style="width:78px">Sector</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr class="msgrow"><td colspan="8">Click "Scan All" to load all NSE F&amp;O stocks</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="font-size:11px;color:#333;padding-bottom:8px;line-height:1.7">
+    Score/5: ORB break(2) + Volume(1) + Momentum(1) + Clean gap(1). &nbsp;
+    <b style="color:#4ade80">BUY CE ++</b> = score 4-5 breakout UP. &nbsp;
+    <b style="color:#f87171">BUY PE ++</b> = score 4-5 breakdown DOWN. &nbsp;
+    Data: Yahoo Finance ~15min delay. Best used after 9:45 AM IST.
+  </div>
+</div>
+
+<!-- TAB: SECTOR PERFORMANCE -->
+<div id="tab-sector" style="display:none">
+  <div class="sector-wrap">
+    <div class="sector-title">
+      <span>Sector Performance (based on loaded stocks)</span>
+      <span style="font-size:12px;color:#555">Average Chg% per sector</span>
+    </div>
+    <div id="sectorChart">
+      <div style="color:#444;font-size:13px;padding:20px 0">Scan stocks first to see sector performance</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: MANAGE STOCKS -->
+<div id="tab-manage" style="display:none">
+  <div class="manage-panel">
+    <div class="manage-header">
+      <span style="font-size:14px;font-weight:600;color:#c084fc">Manage Stock List</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="exportList()" class="btn-go" style="font-size:12px">↓ Export</button>
+        <button onclick="importList()" class="btn-go" style="font-size:12px">↑ Import</button>
+        <button onclick="resetToDefault()" class="btn-red" style="font-size:12px">Reset Default</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <input type="text" id="addSymInput" style="width:180px;text-transform:uppercase" placeholder="Add: TATAPOWER or SBIN,NMDC" oninput="this.value=this.value.toUpperCase()">
+      <select id="addSecInput" style="width:120px">
+        <option value="Other">Other</option>
+        <option value="Banking">Banking</option>
+        <option value="IT">IT</option>
+        <option value="Auto">Auto</option>
+        <option value="Pharma">Pharma</option>
+        <option value="PSU">PSU</option>
+        <option value="Metal">Metal</option>
+        <option value="Energy">Energy</option>
+        <option value="FMCG">FMCG</option>
+        <option value="Infra">Infra</option>
+        <option value="Finance">Finance</option>
+      </select>
+      <button onclick="addSymbol()" class="btn-go">+ Add</button>
+    </div>
+    <div style="font-size:12px;color:#555;margin-bottom:8px" id="stockCount">224 stocks in list</div>
+    <div class="chip-container" id="chipContainer"></div>
+  </div>
+</div>
+
+<script>
+// ── ALL 224 NSE F&O STOCKS ─────────────────────────────
+const DEFAULT_FNO = [
+  {s:'ABCAPITAL',sec:'Finance'},{s:'ABFRL',sec:'FMCG'},{s:'ACC',sec:'Infra'},
+  {s:'ADANIENT',sec:'Infra'},{s:'ADANIPORTS',sec:'Infra'},{s:'ALKEM',sec:'Pharma'},
+  {s:'AMBUJACEM',sec:'Infra'},{s:'ANGELONE',sec:'Finance'},{s:'APLAPOLLO',sec:'Metal'},
+  {s:'APOLLOHOSP',sec:'Pharma'},{s:'APOLLOTYRE',sec:'Auto'},{s:'ASHOKLEY',sec:'Auto'},
+  {s:'ASIANPAINT',sec:'FMCG'},{s:'ASTRAL',sec:'Infra'},{s:'AUBANK',sec:'Banking'},
+  {s:'AUROPHARMA',sec:'Pharma'},{s:'AXISBANK',sec:'Banking'},{s:'BAJAJ-AUTO',sec:'Auto'},
+  {s:'BAJAJFINSV',sec:'Finance'},{s:'BAJFINANCE',sec:'Finance'},{s:'BALKRISIND',sec:'Auto'},
+  {s:'BANDHANBNK',sec:'Banking'},{s:'BANKBARODA',sec:'Banking'},{s:'BATAINDIA',sec:'FMCG'},
+  {s:'BEL',sec:'PSU'},{s:'BERGEPAINT',sec:'FMCG'},{s:'BHARATFORG',sec:'Auto'},
+  {s:'BHARTIARTL',sec:'IT'},{s:'BHEL',sec:'PSU'},{s:'BIOCON',sec:'Pharma'},
+  {s:'BOSCHLTD',sec:'Auto'},{s:'BPCL',sec:'Energy'},{s:'BRITANNIA',sec:'FMCG'},
+  {s:'BSOFT',sec:'IT'},{s:'CAMS',sec:'Finance'},{s:'CANBK',sec:'Banking'},
+  {s:'CANFINHOME',sec:'Finance'},{s:'CDSL',sec:'Finance'},{s:'CESC',sec:'Energy'},
+  {s:'CGPOWER',sec:'PSU'},{s:'CHOLAFIN',sec:'Finance'},{s:'CIPLA',sec:'Pharma'},
+  {s:'COALINDIA',sec:'PSU'},{s:'COFORGE',sec:'IT'},{s:'COLPAL',sec:'FMCG'},
+  {s:'CONCOR',sec:'PSU'},{s:'CROMPTON',sec:'Other'},{s:'CUMMINSIND',sec:'Auto'},
+  {s:'CYIENT',sec:'IT'},{s:'DALBHARAT',sec:'Infra'},{s:'DEEPAKNTR',sec:'Pharma'},
+  {s:'DELHIVERY',sec:'Infra'},{s:'DIVISLAB',sec:'Pharma'},{s:'DIXON',sec:'IT'},
+  {s:'DLF',sec:'Infra'},{s:'DMART',sec:'FMCG'},{s:'DRREDDY',sec:'Pharma'},
+  {s:'EICHERMOT',sec:'Auto'},{s:'ESCORTS',sec:'Auto'},{s:'EXIDEIND',sec:'Auto'},
+  {s:'FEDERALBNK',sec:'Banking'},{s:'GAIL',sec:'Energy'},{s:'GLENMARK',sec:'Pharma'},
+  {s:'GMRAIRPORT',sec:'Infra'},{s:'GODREJCP',sec:'FMCG'},{s:'GODREJPROP',sec:'Infra'},
+  {s:'GRANULES',sec:'Pharma'},{s:'GRASIM',sec:'Other'},{s:'GUJGASLTD',sec:'Energy'},
+  {s:'HAL',sec:'PSU'},{s:'HCLTECH',sec:'IT'},{s:'HDFCAMC',sec:'Finance'},
+  {s:'HDFCBANK',sec:'Banking'},{s:'HDFCLIFE',sec:'Finance'},{s:'HEROMOTOCO',sec:'Auto'},
+  {s:'HINDALCO',sec:'Metal'},{s:'HINDCOPPER',sec:'Metal'},{s:'HINDPETRO',sec:'Energy'},
+  {s:'HINDUNILVR',sec:'FMCG'},{s:'HINDZINC',sec:'Metal'},{s:'HUDCO',sec:'Finance'},
+  {s:'IBULHSGFIN',sec:'Finance'},{s:'ICICIBANK',sec:'Banking'},{s:'ICICIGI',sec:'Finance'},
+  {s:'ICICIPRULI',sec:'Finance'},{s:'IDFCFIRSTB',sec:'Banking'},{s:'IEX',sec:'Energy'},
+  {s:'IGL',sec:'Energy'},{s:'INDHOTEL',sec:'Other'},{s:'INDIACEM',sec:'Infra'},
+  {s:'INDIAMART',sec:'IT'},{s:'INDIANB',sec:'Banking'},{s:'INDIGO',sec:'Other'},
+  {s:'INDUSINDBK',sec:'Banking'},{s:'INDUSTOWER',sec:'IT'},{s:'INFY',sec:'IT'},
+  {s:'IOC',sec:'Energy'},{s:'IPCALAB',sec:'Pharma'},{s:'IRCTC',sec:'PSU'},
+  {s:'IRFC',sec:'Finance'},{s:'ITC',sec:'FMCG'},{s:'JINDALSTEL',sec:'Metal'},
+  {s:'JIOFIN',sec:'Finance'},{s:'JSL',sec:'Metal'},{s:'JSWENERGY',sec:'Energy'},
+  {s:'JSWSTEEL',sec:'Metal'},{s:'JUBLFOOD',sec:'FMCG'},{s:'KAJARIACER',sec:'Infra'},
+  {s:'KOTAKBANK',sec:'Banking'},{s:'KPITTECH',sec:'IT'},{s:'LALPATHLAB',sec:'Pharma'},
+  {s:'LAURUSLABS',sec:'Pharma'},{s:'LICHSGFIN',sec:'Finance'},{s:'LT',sec:'Infra'},
+  {s:'LTIM',sec:'IT'},{s:'LTTS',sec:'IT'},{s:'LUPIN',sec:'Pharma'},
+  {s:'M&M',sec:'Auto'},{s:'M&MFIN',sec:'Finance'},{s:'MANAPPURAM',sec:'Finance'},
+  {s:'MARICO',sec:'FMCG'},{s:'MARUTI',sec:'Auto'},{s:'MAXHEALTH',sec:'Pharma'},
+  {s:'MCX',sec:'Finance'},{s:'MFSL',sec:'Finance'},{s:'MGL',sec:'Energy'},
+  {s:'MOTHERSON',sec:'Auto'},{s:'MPHASIS',sec:'IT'},{s:'MRF',sec:'Auto'},
+  {s:'MUTHOOTFIN',sec:'Finance'},{s:'NATIONALUM',sec:'Metal'},{s:'NAUKRI',sec:'IT'},
+  {s:'NAVINFLUOR',sec:'Pharma'},{s:'NBCC',sec:'PSU'},{s:'NHPC',sec:'Energy'},
+  {s:'NMDC',sec:'Metal'},{s:'NTPC',sec:'Energy'},{s:'OBEROIRLTY',sec:'Infra'},
+  {s:'OFSS',sec:'IT'},{s:'OIL',sec:'Energy'},{s:'ONGC',sec:'Energy'},
+  {s:'PAGEIND',sec:'FMCG'},{s:'PERSISTENT',sec:'IT'},{s:'PETRONET',sec:'Energy'},
+  {s:'PFC',sec:'Finance'},{s:'PIDILITIND',sec:'Other'},{s:'PIIND',sec:'Pharma'},
+  {s:'PNB',sec:'Banking'},{s:'POLYCAB',sec:'Other'},{s:'POWERGRID',sec:'Energy'},
+  {s:'PRESTIGE',sec:'Infra'},{s:'RBLBANK',sec:'Banking'},{s:'RECLTD',sec:'Finance'},
+  {s:'RELIANCE',sec:'Energy'},{s:'RVNL',sec:'PSU'},{s:'SAIL',sec:'Metal'},
+  {s:'SBICARD',sec:'Finance'},{s:'SBILIFE',sec:'Finance'},{s:'SBIN',sec:'Banking'},
+  {s:'SHREECEM',sec:'Infra'},{s:'SHRIRAMFIN',sec:'Finance'},{s:'SIEMENS',sec:'Other'},
+  {s:'SRF',sec:'Pharma'},{s:'SUNPHARMA',sec:'Pharma'},{s:'SUNTV',sec:'Other'},
+  {s:'SUPREMEIND',sec:'Other'},{s:'SYNGENE',sec:'Pharma'},{s:'TATACOMM',sec:'IT'},
+  {s:'TATACONSUM',sec:'FMCG'},{s:'TATAELXSI',sec:'IT'},{s:'TATAMOTORS',sec:'Auto'},
+  {s:'TATAPOWER',sec:'Energy'},{s:'TATASTEEL',sec:'Metal'},{s:'TCS',sec:'IT'},
+  {s:'TECHM',sec:'IT'},{s:'TIINDIA',sec:'Auto'},{s:'TITAN',sec:'Other'},
+  {s:'TORNTPHARM',sec:'Pharma'},{s:'TORNTPOWER',sec:'Energy'},{s:'TRENT',sec:'FMCG'},
+  {s:'TVSMOTOR',sec:'Auto'},{s:'UBL',sec:'FMCG'},{s:'ULTRACEMCO',sec:'Infra'},
+  {s:'UNIONBANK',sec:'Banking'},{s:'UPL',sec:'Pharma'},{s:'VEDL',sec:'Metal'},
+  {s:'VOLTAS',sec:'Other'},{s:'WIPRO',sec:'IT'},{s:'ZOMATO',sec:'Other'},
+  {s:'ZYDUSLIFE',sec:'Pharma'},{s:'MAZDOCK',sec:'PSU'},{s:'IRCON',sec:'PSU'},
+  {s:'COCHINSHIP',sec:'PSU'},{s:'BDL',sec:'PSU'},{s:'SOLARINDS',sec:'Other'},
+  {s:'NYKAA',sec:'Other'},{s:'JKCEMENT',sec:'Infra'},{s:'INOXWIND',sec:'Energy'},
+  {s:'WAAREEENER',sec:'Energy'},{s:'MEDANTA',sec:'Pharma'},{s:'BAJAJHLDNG',sec:'Finance'},
+  {s:'CHAMBLFERT',sec:'Other'},{s:'COROMANDEL',sec:'Other'},{s:'CUB',sec:'Banking'},
+  {s:'DMART',sec:'FMCG'},{s:'FSL',sec:'Finance'},{s:'GNFC',sec:'Pharma'},
+  {s:'GSPL',sec:'Energy'},{s:'HONAUT',sec:'Other'},{s:'INDHOTEL',sec:'Other'},
+  {s:'KALYANKJIL',sec:'Other'},{s:'KEI',sec:'Other'},{s:'METROPOLIS',sec:'Pharma'},
+  {s:'MPHASIS',sec:'IT'},{s:'OBEROIRLTY',sec:'Infra'},{s:'PAGEIND',sec:'FMCG'},
+  {s:'PVRINOX',sec:'Other'},{s:'RAMCOCEM',sec:'Infra'},{s:'UNITDSPR',sec:'FMCG'},
+  {s:'ANGELONE',sec:'Finance'},{s:'ANGELONE',sec:'Finance'},{s:'JIOFIN',sec:'Finance'},
+  {s:'HAL',sec:'PSU'},{s:'CESC',sec:'Energy'}
+];
+
+// Deduplicate
+const seen = new Set();
+const FNO = DEFAULT_FNO.filter(f => { if(seen.has(f.s)) return false; seen.add(f.s); return true; });
+
+let activeList = JSON.parse(localStorage.getItem('orb_stocks_v2') || 'null') || JSON.parse(JSON.stringify(FNO));
+let allData = {};
+let sortKey = 'status';
+let sortAsc = false;
+let scanning = false;
+let loaded = 0;
+
+// ── SECTOR COLORS ──────────────────────────────────────
+const secColors = {Banking:'#1e3a5f',IT:'#1a3d20',Auto:'#3d2a0a',Pharma:'#2a1040',PSU:'#3d3a0a',Metal:'#3d1010',Energy:'#0a2a2a',FMCG:'#3d0a1a',Infra:'#0a2a0a',Finance:'#2a0a2a',Other:'#1a1a2a'};
+const secText   = {Banking:'#60a5fa',IT:'#4ade80',Auto:'#fb923c',Pharma:'#c084fc',PSU:'#fbbf24',Metal:'#f87171',Energy:'#22d3ee',FMCG:'#f472b6',Infra:'#a3e635',Finance:'#e879f9',Other:'#94a3b8'};
+
+// ── SIGNAL CALCULATION ────────────────────────────────
+function calcSig(price, open, dayH, dayL, prevC, vol, avgVol) {
+  const gap = prevC > 0 ? Math.abs(open - prevC) / prevC * 100 : 0;
+  const gapOK = gap < 2;
+  const volOK = avgVol > 0 && vol > avgVol * 1.3;
+  const chg = prevC > 0 ? (price - prevC) / prevC * 100 : 0;
+  const momOK = Math.abs(chg) > 0.8;
+  const up = price > dayH * 1.001;
+  const dn = price < dayL * 0.999;
+  let score = 0;
+  if (up||dn) score+=2;
+  if (volOK) score+=1;
+  if (momOK) score+=1;
+  if (gapOK) score+=1;
+  let status, badge;
+  if      (up && score>=4) { status='BUY CE ++'; badge='ce2'; }
+  else if (up && score>=3) { status='BUY CE +';  badge='ce1'; }
+  else if (up)             { status='CE Weak';   badge='ce1'; }
+  else if (dn && score>=4) { status='BUY PE ++'; badge='pe2'; }
+  else if (dn && score>=3) { status='BUY PE +';  badge='pe1'; }
+  else if (dn)             { status='PE Weak';   badge='pe1'; }
+  else                     { status='Watching';  badge='wait'; }
+  return { status, badge, score, chg, gapOK, volOK };
+}
+
+// ── DATA FETCHING ─────────────────────────────────────
+// Uses multiple CORS proxies in sequence until one works
+// Primary: Yahoo Finance via corsproxy.io
+// Fallback: thingproxy, allorigins, jsonp approach
+
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://cors-anywhere.herokuapp.com/${url}`,
+];
+
+const YF_URL = sym => `https://query1.finance.yahoo.com/v8/finance/chart/${sym}.NS?interval=5m&range=1d&includePrePost=false`;
+const YF2_URL = sym => `https://query2.finance.yahoo.com/v8/finance/chart/${sym}.NS?interval=1d&range=5d`;
+
+let workingProxy = null; // cache which proxy works
+
+async function tryUrl(url, timeout=7000) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const r = await fetch(url, {signal: ctrl.signal});
+    clearTimeout(tid);
+    if (!r.ok) throw new Error('bad status');
+    const text = await r.text();
+    if (!text || text.length < 50) throw new Error('empty');
+    return JSON.parse(text);
+  } catch(e) {
+    clearTimeout(tid);
+    throw e;
+  }
+}
+
+function parseYF(d, sym) {
+  const res = d?.chart?.result?.[0];
+  if (!res?.meta) return null;
+  const meta = res.meta;
+  const q = res.indicators?.quote?.[0] || {};
+  const price = meta.regularMarketPrice || 0;
+  if (price === 0) return null;
+  const prevC = meta.previousClose || meta.chartPreviousClose || 0;
+  const highs = (q.high||[]).filter(v=>v&&v>0);
+  const lows  = (q.low||[]).filter(v=>v&&v>0);
+  const dayH  = meta.regularMarketDayHigh  || (highs.length ? Math.max(...highs) : price);
+  const dayL  = meta.regularMarketDayLow   || (lows.length  ? Math.min(...lows)  : price);
+  const open  = (q.open||[]).find(v=>v&&v>0) || price;
+  const vol   = meta.regularMarketVolume || 0;
+  return {price, prevC, dayH, dayL, open, vol};
+}
+
+async function fetchOne(sym) {
+  const baseUrl = YF_URL(sym);
+
+  // If we found a working proxy, try it first
+  if (workingProxy !== null) {
+    try {
+      const d = await tryUrl(PROXIES[workingProxy](baseUrl));
+      const parsed = parseYF(d, sym);
+      if (parsed) {
+        const {price,prevC,dayH,dayL,open,vol} = parsed;
+        const avgVol = vol > 0 ? vol / 0.35 : 1000000;
+        return {sym, price, prevC, dayH, dayL, vol, ok:true, ...calcSig(price,open,dayH,dayL,prevC,vol,avgVol)};
+      }
+    } catch(e) { workingProxy = null; }
+  }
+
+  // Try all proxies
+  for (let i = 0; i < PROXIES.length; i++) {
+    for (const baseU of [YF_URL(sym), YF2_URL(sym)]) {
+      try {
+        const d = await tryUrl(PROXIES[i](baseU));
+        const parsed = parseYF(d, sym);
+        if (parsed) {
+          workingProxy = i; // cache this working proxy
+          const {price,prevC,dayH,dayL,open,vol} = parsed;
+          const avgVol = vol > 0 ? vol / 0.35 : 1000000;
+          return {sym, price, prevC, dayH, dayL, vol, ok:true, ...calcSig(price,open,dayH,dayL,prevC,vol,avgVol)};
+        }
+      } catch(e) { continue; }
+    }
+  }
+
+  return {sym, ok:false, price:0, chg:0, dayH:0, dayL:0, vol:0, status:'No data', badge:'nd', score:0};
+}
+
+// ── SCAN ──────────────────────────────────────────────
+async function startScan() {
+  if (scanning) return;
+  scanning = true;
+  loaded = 0;
+  allData = {};
+  document.getElementById('refreshBtn').disabled = true;
+  document.getElementById('refreshBtn').textContent = 'Scanning...';
+  document.getElementById('tbody').innerHTML = `<tr class="msgrow"><td colspan="8">Scanning ${activeList.length} stocks... ~30 sec</td></tr>`;
+  document.getElementById('pbar').style.width = '0%';
+  const BATCH = 8;
+  for (let i = 0; i < activeList.length; i += BATCH) {
+    const batch = activeList.slice(i, i+BATCH);
+    const results = await Promise.all(batch.map(f => fetchOne(f.s)));
+    results.forEach((r,idx) => { allData[batch[idx].s] = r; });
+    loaded += batch.length;
+    const pct = (loaded/activeList.length*100).toFixed(0);
+    document.getElementById('s-loaded').textContent = loaded+'/'+activeList.length;
+    document.getElementById('ad-loaded').textContent = 'Loaded: '+loaded+'/'+activeList.length;
+    document.getElementById('pbar').style.width = pct+'%';
+    updateADBar();
+    renderTable();
+    renderSectorChart();
+    await new Promise(res => setTimeout(res, 180));
+  }
+  scanning = false;
+  document.getElementById('refreshBtn').disabled = false;
+  document.getElementById('refreshBtn').textContent = '↻ Scan All';
+  const proxyNames = ['corsproxy.io','thingproxy','allorigins','cors-anywhere'];
+  const proxyInfo = workingProxy !== null ? ` via ${proxyNames[workingProxy]}` : '';
+  document.getElementById('ts').textContent = 'Updated '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+proxyInfo;
+  updateADBar();
+  renderTable();
+  renderSectorChart();
+}
+
+// ── ADVANCE / DECLINE BAR ─────────────────────────────
+function updateADBar() {
+  const vals = Object.values(allData).filter(d=>d.ok);
+  const adv   = vals.filter(d=>d.chg > 0.2).length;
+  const dec   = vals.filter(d=>d.chg < -0.2).length;
+  const unch  = vals.length - adv - dec;
+  const total = vals.length || 1;
+  const ap = (adv/total*100).toFixed(0)+'%';
+  const up = (unch/total*100).toFixed(0)+'%';
+  const dp = (dec/total*100).toFixed(0)+'%';
+  document.getElementById('adv-bar').style.width  = ap;
+  document.getElementById('unch-bar').style.width = up;
+  document.getElementById('dec-bar').style.width  = dp;
+  document.getElementById('adv-bar').textContent  = adv;
+  document.getElementById('unch-bar').textContent = unch;
+  document.getElementById('dec-bar').textContent  = dec;
+  document.getElementById('adv-count').textContent  = 'Advancing: '+adv;
+  document.getElementById('unch-count').textContent = 'Unchanged: '+unch;
+  document.getElementById('dec-count').textContent  = 'Declining: '+dec;
+  const ratio = dec > 0 ? (adv/dec).toFixed(2) : '∞';
+  const bias  = adv > dec ? '🟢 Bullish' : adv < dec ? '🔴 Bearish' : '⚪ Neutral';
+  document.getElementById('ad-ratio').textContent = 'A/D: '+adv+'/'+dec+' | '+bias;
+}
+
+// ── SECTOR CHART ─────────────────────────────────────
+function renderSectorChart() {
+  const sectorData = {};
+  activeList.forEach(f => {
+    const d = allData[f.s];
+    if (!d || !d.ok) return;
+    if (!sectorData[f.sec]) sectorData[f.sec] = {total:0, count:0};
+    sectorData[f.sec].total += d.chg;
+    sectorData[f.sec].count++;
+  });
+  const rows = Object.entries(sectorData)
+    .map(([sec,v]) => ({sec, avg: v.count>0 ? v.total/v.count : 0, count: v.count}))
+    .filter(r=>r.count>0)
+    .sort((a,b) => b.avg - a.avg);
+  if (!rows.length) return;
+  const maxAbs = Math.max(...rows.map(r=>Math.abs(r.avg)), 0.1);
+  document.getElementById('sectorChart').innerHTML = rows.map(r => {
+    const pct  = (r.avg/maxAbs*100).toFixed(0);
+    const pos  = r.avg >= 0;
+    const col  = pos ? '#22c55e' : '#ef4444';
+    const tcol = pos ? '#052e16' : '#450a0a';
+    const w    = Math.abs(r.avg/maxAbs*100).toFixed(0)+'%';
+    const sign = pos ? '+' : '';
+    return `<div class="sector-row">
+      <div class="sector-name">${r.sec}</div>
+      <div class="sector-bar-wrap">
+        <div class="sector-bar" style="width:${w};background:${col};color:${tcol}">
+          ${Math.abs(r.avg)>0.3 ? sign+r.avg.toFixed(2)+'%' : ''}
+        </div>
+      </div>
+      <div class="sector-pct" style="color:${col}">${sign+r.avg.toFixed(2)}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TABLE RENDER ─────────────────────────────────────
+function fmtVol(v) {
+  if (v>=1e7) return (v/1e7).toFixed(1)+'Cr';
+  if (v>=1e5) return (v/1e5).toFixed(1)+'L';
+  if (v>=1e3) return (v/1e3).toFixed(0)+'K';
+  return ''+Math.round(v);
+}
+
+function renderTable() {
+  const filter = document.getElementById('filterSel').value;
+  const sector = document.getElementById('sectorSel').value;
+  const search = document.getElementById('searchInput').value.toUpperCase().trim();
+  const order  = {'ce2':0,'ce1':1,'pe2':2,'pe1':3,'wait':4,'nd':5};
+  let rows = activeList.map(f => {
+    const d = allData[f.s];
+    if (!d) return {sym:f.s,sec:f.sec,price:0,chg:0,dayH:0,dayL:0,vol:0,status:'–',badge:'nd',score:0,ok:false};
+    return {...d,sym:f.s,sec:f.sec};
+  });
+  if (search)          rows = rows.filter(r=>r.sym.includes(search));
+  if (sector!=='all')  rows = rows.filter(r=>r.sec===sector);
+  if (filter==='ce')   rows = rows.filter(r=>r.badge?.startsWith('ce'));
+  if (filter==='pe')   rows = rows.filter(r=>r.badge?.startsWith('pe'));
+  if (filter==='strong') rows = rows.filter(r=>r.badge==='ce2'||r.badge==='pe2');
+  if (filter==='wait') rows = rows.filter(r=>r.badge==='wait');
+  rows.sort((a,b)=>{
+    if (sortKey==='status')  {const va=order[a.badge]??9,vb=order[b.badge]??9;return sortAsc?va-vb:vb-va;}
+    if (sortKey==='score')   return sortAsc?a.score-b.score:b.score-a.score;
+    if (sortKey==='price')   return sortAsc?a.price-b.price:b.price-a.price;
+    if (sortKey==='change')  return sortAsc?a.chg-b.chg:b.chg-a.chg;
+    if (sortKey==='symbol')  return sortAsc?a.sym.localeCompare(b.sym):b.sym.localeCompare(a.sym);
+    return 0;
+  });
+  const lr = Object.values(allData).filter(d=>d.ok);
+  document.getElementById('s-total').textContent = activeList.length;
+  document.getElementById('s-ce').textContent    = lr.filter(r=>r.badge?.startsWith('ce')).length||'–';
+  document.getElementById('s-pe').textContent    = lr.filter(r=>r.badge?.startsWith('pe')).length||'–';
+  document.getElementById('s-wait').textContent  = lr.filter(r=>r.badge==='wait').length||'–';
+  if (!rows.length){document.getElementById('tbody').innerHTML='<tr class="msgrow"><td colspan="8">No results</td></tr>';return;}
+  document.getElementById('tbody').innerHTML = rows.map(r=>{
+    const cc=r.chg>=0?'pos':'neg';
+    const cs=(r.chg>=0?'+':'')+r.chg.toFixed(2)+'%';
+    const orb=r.dayH>0?r.dayL.toFixed(1)+' – '+r.dayH.toFixed(1):'–';
+    const dc=r.badge?.startsWith('ce')?'#4ade80':r.badge?.startsWith('pe')?'#f87171':r.badge==='wait'?'#fbbf24':'#2a2a3a';
+    const dots=Array(5).fill(0).map((_,i)=>`<div class="dot" style="background:${i<r.score?dc:'#1e1e2e'}"></div>`).join('');
+    const st=secText[r.sec]||'#888';
+    return `<tr>
+      <td><a href="tradingview://chart?symbol=NSE:${r.sym}" onclick="setTimeout(()=>{window.open('https://www.tradingview.com/symbols/NSE-${r.sym}/','_blank')},500)" style="text-decoration:none" title="Open in TradingView"><span class="tkr" style="border-bottom:1px dotted #4ade80">${r.sym} ↗</span></a></td>
+      <td>${r.price>0?r.price.toFixed(2):'–'}</td>
+      <td class="${cc}">${cs}</td>
+      <td><span class="badge ${r.badge||'nd'}">${r.status}</span></td>
+      <td class="orbs">${orb}</td>
+      <td><div class="dots">${dots}</div></td>
+      <td class="orbs">${r.vol>0?fmtVol(r.vol):'–'}</td>
+      <td><span class="sec-tag" style="color:${st}">${r.sec}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function sortBy(k){if(sortKey===k)sortAsc=!sortAsc;else{sortKey=k;sortAsc=false;}renderTable();}
+
+// ── TABS ─────────────────────────────────────────────
+function showTab(name, el) {
+  ['screener','sector','manage'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===name?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if (name==='sector') renderSectorChart();
+  if (name==='manage') renderChips();
+}
+
+// ── MANAGE STOCKS ────────────────────────────────────
+function saveList(){localStorage.setItem('orb_stocks_v2',JSON.stringify(activeList));document.getElementById('stockCount').textContent=activeList.length+' stocks in list';}
+
+function renderChips(){
+  document.getElementById('stockCount').textContent=activeList.length+' stocks in list';
+  document.getElementById('chipContainer').innerHTML=activeList.map((f,i)=>
+    `<div class="chip" style="background:${secColors[f.sec]||'#1a1a2a'};border-color:#2a2a3a">
+      <span style="color:${secText[f.sec]||'#aaa'};font-weight:600">${f.s}</span>
+      <span style="color:#555;font-size:10px">${f.sec}</span>
+      <span class="chip-x" onclick="removeStock(${i})" title="Remove">&times;</span>
+    </div>`
+  ).join('');
+}
+
+function addSymbol(){
+  const raw=document.getElementById('addSymInput').value.trim().toUpperCase();
+  const sec=document.getElementById('addSecInput').value;
+  if(!raw)return;
+  const syms=raw.split(',').map(s=>s.trim()).filter(s=>s.length>0);
+  let added=0;
+  syms.forEach(sym=>{if(!activeList.find(f=>f.s===sym)){activeList.push({s:sym,sec});added++;}});
+  document.getElementById('addSymInput').value='';
+  saveList();renderChips();
+  document.getElementById('s-total').textContent=activeList.length;
+  if(added>0)alert(added+' stock(s) added! Click Scan All to load data.');
+  else alert('Already in list.');
+}
+
+function removeStock(idx){
+  if(!confirm('Remove '+activeList[idx].s+'?'))return;
+  delete allData[activeList[idx].s];
+  activeList.splice(idx,1);
+  saveList();renderChips();
+  document.getElementById('s-total').textContent=activeList.length;
+  renderTable();updateADBar();renderSectorChart();
+}
+
+function resetToDefault(){
+  if(!confirm('Reset to all 224 default stocks?'))return;
+  activeList=JSON.parse(JSON.stringify(FNO));
+  saveList();renderChips();
+  document.getElementById('s-total').textContent=activeList.length;
+  allData={};renderTable();updateADBar();
+}
+
+function exportList(){
+  const txt=activeList.map(f=>f.s+','+f.sec).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download='my_orb_stocks.txt';a.click();
+}
+
+function importList(){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='.txt,.csv';
+  inp.onchange=e=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const lines=ev.target.result.split('\n').map(l=>l.trim()).filter(l=>l);
+      let imported=0;
+      lines.forEach(line=>{
+        const parts=line.split(',');
+        const sym=parts[0]?.trim().toUpperCase();
+        const sec=parts[1]?.trim()||'Other';
+        if(sym&&!activeList.find(f=>f.s===sym)){activeList.push({s:sym,sec});imported++;}
+      });
+      saveList();renderChips();
+      document.getElementById('s-total').textContent=activeList.length;
+      alert(imported+' stocks imported!');
+    };
+    reader.readAsText(e.target.files[0]);
+  };
+  inp.click();
+}
+
+// ── INIT ─────────────────────────────────────────────
+document.getElementById('s-total').textContent = activeList.length;
+document.getElementById('s-loaded').textContent = '0/'+activeList.length;
+document.getElementById('ad-loaded').textContent = 'Loaded: 0/'+activeList.length;
+</script>
+</body>
+</html>
